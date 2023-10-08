@@ -3,6 +3,7 @@ import MaxWidthWrapper from "./MaxWidthWrapper"
 import { buttonVariants } from "@/components/ui/button"
 import { LoginLink, RegisterLink } from "@kinde-oss/kinde-auth-nextjs/server"
 import { ArrowRight } from "lucide-react"
+import Image from "next/image";
 
 const Navbar = () => {
     return (
@@ -10,7 +11,8 @@ const Navbar = () => {
             <MaxWidthWrapper>
                 <div className="flex h-14 items-center justify-between border-b border-zinc-200">
                     <Link href="/" className="flex z-40 font-semibold">
-                        <span className="text-blue-600">torpedo<span className="text-orange-400">chat</span></span>
+                        {/*<span className="text-blue-600">torpedo<span className="text-orange-400">chat.</span></span>*/}
+                        <Image src="/torpedochat_logo_full_size.png" alt="company logo" width={150} height={38} quality={100}/>
                     </Link>
                     {/* Add mobile Navbar after authentification */}
                     <div className="hidden items-center space-x-4 sm:flex"></div>
