@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Dialog, DialogTrigger } from "./ui/dialog"
+import { Dialog, DialogContent, DialogTrigger } from "./ui/dialog"
 import { Button } from "./ui/button"
 
 const UploadButton = () => {
@@ -13,9 +13,12 @@ const UploadButton = () => {
             setIsOpen(v)
         }
        }}>
-        <DialogTrigger asChild>
+        <DialogTrigger onClick={() => setIsOpen(true)} asChild>
             <Button>Upload PDF</Button>
         </DialogTrigger>
+        <DialogContent>
+            example content
+        </DialogContent>
        </Dialog> 
     )
 }
