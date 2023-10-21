@@ -38,54 +38,57 @@ export const appRouter = router({
     });
   }),
 
-  getFile: privateProcedure.input(z.object({key: z.string()}))
-  .mutation(async ({ ctx, input}) => {
-    const {userId} = ctx
-    const file = await db.file.findFirst({
-      where: {
-        key:input.key,
-        userId
-      }
-    })
+  getFile: privateProcedure
+    .input(z.object({ key: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const { userId } = ctx;
+      const file = await db.file.findFirst({
+        where: {
+          key: input.key,
+          userId,
+        },
+      });
 
-    if(!file) throw new TRPCError({code : "NOT_FOUND"})
-    return file
-  }),
+      if (!file) throw new TRPCError({ code: "NOT_FOUND" });
+      return file;
+    }),
 
-  deleteFile: privateProcedure.input(z.object({ id: z.string() })).mutation(async ({ ctx, input }) => {
-      const { userId } = ctx
+  deleteFile: privateProcedure
+    .input(z.object({ id: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const { userId } = ctx;
 
       const file = await db.file.findFirst({
         where: {
           id: input.id,
           userId,
         },
-      })
+      });
 
-      if (!file) throw new TRPCError({ code: 'NOT_FOUND' })
+      if (!file) throw new TRPCError({ code: "NOT_FOUND" });
 
       await db.file.delete({
         where: {
           id: input.id,
         },
-      })
+      });
 
-      return file
-  }),
+      return file;
+    }),
 
-  getFileUploadStatus: privateProcedure.input(z.object({fileId: z.string()})).mutation(async({input, ctx}) => {
-    const file = await db.file.findFirst
-    ({
-        where:{
+  getFileUploadStatus: privateProcedure
+    .input(z.object({ fileId: z.string() }))
+    .query(async ({ input, ctx }) => {
+      const file = await db.file.findFirst({
+        where: {
           id: input.fileId,
           userId: ctx.userId,
         },
-      })
-      if (!file) return {status: "PENDING" as const}
+      });
+      if (!file) return { status: "PENDING" as const };
 
-      return {status: file.uploadStatus}
-  }),
-
+      return { status: file.uploadStatus };
+    }),
 });
 
 export type AppRouter = typeof appRouter;
