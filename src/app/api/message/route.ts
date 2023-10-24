@@ -3,10 +3,11 @@ import { SendMessageValidator } from "@/app/lib/validators/sendMessageValidator"
 import { db } from "@/db";
 import { openai } from "@/lib/openai";
 import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
-import { QdrantClient } from "@qdrant/js-client-rest";
 import { OpenAIEmbeddings } from "langchain/embeddings/openai";
 import { QdrantVectorStore } from "langchain/vectorstores/qdrant";
 import { NextRequest } from "next/server";
+
+import { OpenAIStream, StreamingTextResponse } from 'ai'
 
 export const POST = async (req: NextRequest) => {
   //endpoint for asking a question to a pdf file
@@ -70,7 +71,7 @@ export const POST = async (req: NextRequest) => {
   });
 
   const vectorStore = await QdrantVectorStore.fromExistingCollection(
-    new OpenAIEmbeddings(),
+    embeddings,
     {
       url: process.env.QDRANT_URL,
       collectionName: collectionName,
@@ -126,5 +127,20 @@ export const POST = async (req: NextRequest) => {
     ],
       
   });
+
+  const stream = OpenAIStream(response, {
+    async onCompletion(completion) {
+      await db.message.create({
+        data: {
+          text: completion,
+          isUserMessage: false,
+          fileId,
+          userId,
+        },
+      })
+    },
+  })
+
+  return new StreamingTextResponse(stream)
 
 };
