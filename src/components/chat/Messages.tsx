@@ -30,7 +30,7 @@ const Messages = ({ fileId }: MessagesProps) => {
 
   const loadingMessage = {
     createdAt: new Date().toISOString(),
-    id: 'loading-mwssage',
+    id: 'loading-message',
     isUserMessage: false,
     text: (
       <span className="flex h-full items-center justify-center">
