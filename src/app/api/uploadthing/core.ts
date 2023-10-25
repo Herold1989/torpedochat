@@ -3,21 +3,20 @@ import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 import { createUploadthing, type FileRouter } from "uploadthing/next";
 import { PDFLoader } from "langchain/document_loaders/fs/pdf";
 import { OpenAIEmbeddings } from "langchain/embeddings/openai";
-import { getQdrantClient } from "@/app/lib/Qdrant";
 import { QdrantVectorStore } from "langchain/vectorstores/qdrant";
-import { log } from "console";
+import { getQdrantClient } from "@/app/lib/qdrant";
 
 const f = createUploadthing();
 
 export const ourFileRouter = {
-  // Define as many FileRoutes as you like, each with a unique routeSlug
   pdfUploader: f({ pdf: { maxFileSize: "4MB" } })
-    // Set permissions and file types for this FileRoute
     .middleware(async ({ req }) => {
       const { getUser } = getKindeServerSession();
       const user = getUser();
 
-      if (!user || !user.id) throw new Error("Unauthorized");
+      if (!user || !user.id) {
+        throw new Error("Unauthorized");
+      }
 
       return { userId: user.id };
     })
@@ -36,9 +35,11 @@ export const ourFileRouter = {
         const response = await fetch(
           `https://uploadthing-prod.s3.us-west-2.amazonaws.com/${file.key}`
         );
+
         const blob = await response.blob();
 
         const loader = new PDFLoader(blob);
+
         const pageLevelDocs = await loader.load();
 
         const pagesAmt = pageLevelDocs.length;
@@ -47,36 +48,16 @@ export const ourFileRouter = {
           openAIApiKey: process.env.OPENAI_API_KEY,
         });
 
-        // Qdrant part - Vector indexing PDF
-        const collectionName = "torpedochat";
-
-        const qdrant = await getQdrantClient();
-        const qdrantResponse = await qdrant.getCollections();
-        
-        const collectionNames = qdrantResponse.collections.map(
-          (collection) => collection.name
-        );
-
-        if (collectionNames.includes(collectionName)) {
-          await qdrant.deleteCollection(collectionName);
-        }
-
-        await qdrant.createCollection(collectionName, {
-          vectors: {
-            size: 1536,
-            distance: "Cosine",
-          },
-          optimizers_config: {
-            default_segment_number: 2, // work here
-          },
-          replication_factor: 2, // work here
-        });
+        const qdrantClient = getQdrantClient();
 
         await QdrantVectorStore.fromDocuments(pageLevelDocs, embeddings, {
+
+          client: qdrantClient,
           url: process.env.QDRANT_URL,
-          collectionName: collectionName,
+          apiKey: process.env.QDRANT_API_KEY,
+          collectionName: `drop-doc-${file.key}`,
         });
-        
+
         await db.file.update({
           data: {
             uploadStatus: "SUCCESS",
@@ -85,8 +66,8 @@ export const ourFileRouter = {
             id: createdFile.id,
           },
         });
-      } catch (err) {
-        console.log(err);
+      } catch (e) {
+        console.log(e);
         await db.file.update({
           data: {
             uploadStatus: "FAILED",

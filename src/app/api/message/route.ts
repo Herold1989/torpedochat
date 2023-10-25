@@ -1,4 +1,3 @@
-import { getQdrantClient } from "@/app/lib/Qdrant";
 import { SendMessageValidator } from "@/app/lib/validators/sendMessageValidator";
 import { db } from "@/db";
 import { openai } from "@/lib/openai";
@@ -7,7 +6,8 @@ import { OpenAIEmbeddings } from "langchain/embeddings/openai";
 import { QdrantVectorStore } from "langchain/vectorstores/qdrant";
 import { NextRequest } from "next/server";
 
-import { OpenAIStream, StreamingTextResponse } from 'ai'
+import { OpenAIStream, StreamingTextResponse } from "ai";
+import { getQdrantClient } from "@/app/lib/qdrant";
 
 export const POST = async (req: NextRequest) => {
   //endpoint for asking a question to a pdf file
@@ -39,42 +39,16 @@ export const POST = async (req: NextRequest) => {
     },
   });
 
-  //
-
+  // 1: vectorize message
   const embeddings = new OpenAIEmbeddings({
     openAIApiKey: process.env.OPENAI_API_KEY,
-  });
-
-  // Qdrant part - Vector indexing PDF
-  const collectionName = "torpedochat";
-
-  const qdrant = await getQdrantClient();
-  const qdrantResponse = await qdrant.getCollections();
-
-  const collectionNames = qdrantResponse.collections.map(
-    (collection) => collection.name
-  );
-
-  if (collectionNames.includes(collectionName)) {
-    await qdrant.deleteCollection(collectionName);
-  }
-
-  await qdrant.createCollection(collectionName, {
-    vectors: {
-      size: 1536,
-      distance: "Cosine",
-    },
-    optimizers_config: {
-      default_segment_number: 2, // work here
-    },
-    replication_factor: 2, // work here
+    modelName: "text-embedding-ada-002",
   });
 
   const vectorStore = await QdrantVectorStore.fromExistingCollection(
     embeddings,
     {
-      url: process.env.QDRANT_URL,
-      collectionName: collectionName,
+      collectionName: `drop-doc-${file.key}`,
     }
   );
 
@@ -101,31 +75,30 @@ export const POST = async (req: NextRequest) => {
     stream: true,
     messages: [
       {
-        role: 'system',
+        role: "system",
         content:
-          'Use the following pieces of context (or previous conversaton if needed) to answer the users question in markdown format.',
+          "Use the following pieces of context (or previous conversaton if needed) to answer the users question in markdown format.",
       },
       {
-        role: 'user',
+        role: "user",
         content: `Use the following pieces of context (or previous conversaton if needed) to answer the users question in markdown format. \nIf you don't know the answer, just say that you don't know, don't try to make up an answer.
         
   \n----------------\n
   
   PREVIOUS CONVERSATION:
   ${formattedPrevMessages.map((message) => {
-    if (message.role === 'user') return `User: ${message.content}\n`
-    return `Assistant: ${message.content}\n`
+    if (message.role === "user") return `User: ${message.content}\n`;
+    return `Assistant: ${message.content}\n`;
   })}
   
   \n----------------\n
   
   CONTEXT:
-  ${results.map((r) => r.pageContent).join('\n\n')}
+  ${results.map((r) => r.pageContent).join("\n\n")}
   
   USER INPUT: ${message}`,
       },
     ],
-      
   });
 
   const stream = OpenAIStream(response, {
@@ -137,10 +110,9 @@ export const POST = async (req: NextRequest) => {
           fileId,
           userId,
         },
-      })
+      });
     },
-  })
+  });
 
-  return new StreamingTextResponse(stream)
-
+  return new StreamingTextResponse(stream);
 };
