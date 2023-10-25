@@ -40,7 +40,7 @@ const Messages = ({ fileId }: MessagesProps) => {
   }
 
   const combinedMessages = [
-    ...(isAiThinking ? [loadingMessage] : []),
+    ...(true ? [loadingMessage] : []),
     ...(messages ?? []),
   ]
 
@@ -96,7 +96,7 @@ const Messages = ({ fileId }: MessagesProps) => {
           <MessageSquare className="h-8 w-8 text-blue-500" />
           <h3 className="text-xl font-semibold"> You&apos;re all set!</h3>
           <p className="text-sm text-zinc-500">
-            Ask youre first question to get started.
+            Ask your first question to get started.
           </p>
         </div>
       )}
