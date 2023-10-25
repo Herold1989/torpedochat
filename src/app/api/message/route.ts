@@ -42,7 +42,7 @@ export const POST = async (req: NextRequest) => {
   // 1: vectorize message
   const embeddings = new OpenAIEmbeddings({
     openAIApiKey: process.env.OPENAI_API_KEY,
-    modelName: "text-embedding-ada-002",
+    modelName: "text-embedding-ada-002", // a OPEN-AI-NAME
   });
 
   const vectorStore = await QdrantVectorStore.fromExistingCollection(
