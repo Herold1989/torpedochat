@@ -40,7 +40,7 @@ const Messages = ({ fileId }: MessagesProps) => {
   }
 
   const combinedMessages = [
-    ...(true ? [loadingMessage] : []),
+    ...(isAiThinking ? [loadingMessage] : []),
     ...(messages ?? []),
   ]
 
