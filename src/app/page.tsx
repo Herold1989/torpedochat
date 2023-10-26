@@ -16,7 +16,7 @@ export default function Home() {
           </p>
         </div>
         <h1 className="max-w-4xl text-5xl font-bold md:text-6xl lg:text-7xl">
-          Talk to your <span className="text-blue-600">Documents</span> in seconds.
+          Talk to your <span className="text-blue-600"> Financial Documents</span> in seconds.
         </h1>
         <p className="mt-5 max-w-prose text-zinc-700 sm:text-lg">
           TorpedoChat allows you to chat with any PDF document.
