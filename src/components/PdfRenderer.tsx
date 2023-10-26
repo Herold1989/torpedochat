@@ -82,7 +82,7 @@ const PdfRenderer = ({ url }: PdfRendererProps) => {
             variant="ghost"
             aria-label="previous page"
           >
-            <ChevronDown className="h-4 w-4 " />
+            <ChevronUp className="h-4 w-4 " />
           </Button>
 
           <div className="flex items-center gap-1.5">
@@ -114,7 +114,7 @@ const PdfRenderer = ({ url }: PdfRendererProps) => {
             variant="ghost"
             aria-label="next page"
           >
-            <ChevronUp className="h-4 w-4 " />
+            <ChevronDown className="h-4 w-4 " />
           </Button>
         </div>
         <div className="space-x-2">
@@ -126,6 +126,9 @@ const PdfRenderer = ({ url }: PdfRendererProps) => {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent>
+              <DropdownMenuItem onSelect={() => setScale(0.75)}>
+                75%
+              </DropdownMenuItem>
               <DropdownMenuItem onSelect={() => setScale(1)}>
                 100%
               </DropdownMenuItem>
