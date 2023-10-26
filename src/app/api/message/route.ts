@@ -7,7 +7,6 @@ import { QdrantVectorStore } from "langchain/vectorstores/qdrant";
 import { NextRequest } from "next/server";
 
 import { OpenAIStream, StreamingTextResponse } from "ai";
-import { getQdrantClient } from "@/app/lib/qdrant";
 
 export const POST = async (req: NextRequest) => {
   //endpoint for asking a question to a pdf file
