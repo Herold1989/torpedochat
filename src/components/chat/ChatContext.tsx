@@ -164,7 +164,7 @@ export const ChatContextProvider = ({ fileId, children }: Props) => {
                 return page
             })
 
-            return { ...old, oages: updatedPages}
+            return { ...old, pages: updatedPages}
           }
         );
       }
