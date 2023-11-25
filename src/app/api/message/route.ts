@@ -1,4 +1,3 @@
-import { SendMessageValidator } from "@/app/lib/validators/sendMessageValidator";
 import { db } from "@/db";
 import { openai } from "@/lib/openai";
 import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
@@ -7,6 +6,7 @@ import { QdrantVectorStore } from "langchain/vectorstores/qdrant";
 import { NextRequest } from "next/server";
 
 import { OpenAIStream, StreamingTextResponse } from "ai";
+import { SendMessageValidator } from "@/lib/validators/sendMessageValidator";
 
 export const POST = async (req: NextRequest) => {
   //endpoint for asking a question to a pdf file
