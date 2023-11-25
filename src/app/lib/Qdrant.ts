@@ -4,7 +4,7 @@ export const getQdrantClient = () => {
     const client = new QdrantClient({
         url: process.env.QDRANT_URL!,
         apiKey: process.env.QDRANT_API_KEY!,
-        port: 3000,
+        port: 6333,
     })
     return client
 }
