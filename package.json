@@ -38,6 +38,7 @@
     "next": "13.5.4",
     "openai": "^4.13.0",
     "pdf-parse": "^1.1.1",
+    "qdrant": "link:@/app/lib/qdrant",
     "react": "^18",
     "react-dom": "^18",
     "react-dropzone": "^14.2.3",
