@@ -4,7 +4,7 @@ import { createUploadthing, type FileRouter } from "uploadthing/next";
 import { PDFLoader } from "langchain/document_loaders/fs/pdf";
 import { OpenAIEmbeddings } from "langchain/embeddings/openai";
 import { QdrantVectorStore } from "langchain/vectorstores/qdrant";
-import { getQdrantClient } from "@/app/lib/qdrant";
+import { getQdrantClient } from "../../lib/qdrant";
 
 const f = createUploadthing();
 
