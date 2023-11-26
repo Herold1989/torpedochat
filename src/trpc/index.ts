@@ -31,7 +31,7 @@ export const appRouter = router({
       });
     }
 
-    return { sucess: true };
+    return { success: true };
   }),
   getUserFiles: privateProcedure.query(async ({ ctx }) => {
     const { userId } = ctx;
