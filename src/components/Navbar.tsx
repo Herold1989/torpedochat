@@ -37,12 +37,15 @@ const Navbar = () => {
                         variant: "ghost",
                         size: "sm",
                     })}>Dashboard</Link>
-                    {/* <UserAccountNav name = {
-                        !user.given_name || !user.family_name ? "Your Account" : ´${user.family_name}``
-                    }
-                    email = {user.email ?? ""}
-                    imageUrl = {user.picture ?? ""}
-                    /> */}
+                    <UserAccountNav
+                  name={
+                    !user.given_name || !user.family_name
+                      ? 'Your Account'
+                      : `${user.given_name} ${user.family_name}`
+                  }
+                  email={user.email ?? ''}
+                  imageUrl={user.picture ?? ''}
+                />
                     </>}
                 </div>
             </MaxWidthWrapper>
