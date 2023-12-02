@@ -7,7 +7,7 @@ import {
   DropdownMenuTrigger,
 } from './ui/dropdown-menu'
 import { Button } from './ui/button'
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/Avatar"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/Avatar" //could use shadcn-ui directly
 import Image from 'next/image'
 import { Icons } from './Icons'
 import Link from 'next/link'
