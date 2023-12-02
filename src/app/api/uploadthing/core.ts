@@ -1,10 +1,10 @@
 import { db } from "@/db";
 import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 import { createUploadthing, type FileRouter } from "uploadthing/next";
-import { PDFLoader } from "langchain/document_loaders/fs/pdf";
-import { OpenAIEmbeddings } from "langchain/embeddings/openai";
 import { QdrantVectorStore } from "langchain/vectorstores/qdrant";
 import { getQdrantClient } from "@/lib/qdrant";
+import { PDFLoader } from "langchain/document_loaders/fs/pdf";
+import { OpenAIEmbeddings } from "langchain/embeddings/openai";
 import { getUserSubscriptionPlan } from "@/lib/stripe";
 import { PLANS } from "@/config/stripe";
 
@@ -12,33 +12,33 @@ const f = createUploadthing();
 
 const middleware = async () => {
   const { getUser } = getKindeServerSession();
-      const user = getUser();
+  const user = getUser();
 
-      if (!user || !user.id) {
-        throw new Error("Unauthorized");
-      }
+  if (!user || !user.id) throw new Error("Unauthorized");
 
-      const subscriptionPlan = await getUserSubscriptionPlan()
+  const subscriptionPlan = await getUserSubscriptionPlan();
 
-      return { subscriptionPlan, userId: user.id };
-}
+  return { subscriptionPlan, userId: user.id };
+};
 
 const onUploadComplete = async ({
-  metadata, file
-} : { metadata: Awaited<ReturnType<typeof middleware>>
-file: {
-  key: string
-  name: string
-  url: string
-}}) => {
-
+  metadata,
+  file,
+}: {
+  metadata: Awaited<ReturnType<typeof middleware>>;
+  file: {
+    key: string;
+    name: string;
+    url: string;
+  };
+}) => {
   const isFileExist = await db.file.findFirst({
     where: {
-      key: file.key
-    }
-  })
+      key: file.key,
+    },
+  });
 
-  if(isFileExist) return
+  if (isFileExist) return;
 
   const createdFile = await db.file.create({
     data: {
@@ -63,20 +63,23 @@ file: {
 
     const pagesAmt = pageLevelDocs.length;
 
-    const {subscriptionPlan} = metadata
-    const {isSubscribed} = subscriptionPlan
-    const isProExceeded = pagesAmt > PLANS.find((plan) => plan.name === "Pro")!.pagesPerPdf
-    const isFreeExceeded = pagesAmt > PLANS.find((plan) => plan.name === "Free")!.pagesPerPdf
+    const { subscriptionPlan } = metadata;
+    const { isSubscribed } = subscriptionPlan;
 
-    if((isSubscribed && isProExceeded) || (!isSubscribed && isFreeExceeded)) {
+    const isProExceeded =
+      pagesAmt > PLANS.find((plan) => plan.name === "Pro")!.pagesPerPdf;
+    const isFreeExceeded =
+      pagesAmt > PLANS.find((plan) => plan.name === "Free")!.pagesPerPdf;
+
+    if ((isSubscribed && isProExceeded) || (!isSubscribed && isFreeExceeded)) {
       await db.file.update({
         data: {
-          uploadStatus: "FAILED"
+          uploadStatus: "FAILED",
         },
         where: {
           id: createdFile.id,
-        }
-      })
+        },
+      });
     }
 
     const embeddings = new OpenAIEmbeddings({
@@ -86,7 +89,6 @@ file: {
     const qdrantClient = getQdrantClient();
 
     await QdrantVectorStore.fromDocuments(pageLevelDocs, embeddings, {
-
       client: qdrantClient,
       url: process.env.QDRANT_URL,
       apiKey: process.env.QDRANT_API_KEY,
@@ -101,8 +103,7 @@ file: {
         id: createdFile.id,
       },
     });
-  } catch (e) {
-    console.log(e);
+  } catch (err) {
     await db.file.update({
       data: {
         uploadStatus: "FAILED",
@@ -112,7 +113,7 @@ file: {
       },
     });
   }
-}
+};
 
 export const ourFileRouter = {
   freePlanUploader: f({ pdf: { maxFileSize: "4MB" } })
@@ -120,7 +121,7 @@ export const ourFileRouter = {
     .onUploadComplete(onUploadComplete),
   proPlanUploader: f({ pdf: { maxFileSize: "16MB" } })
     .middleware(middleware)
-    .onUploadComplete(onUploadComplete)
+    .onUploadComplete(onUploadComplete),
 } satisfies FileRouter;
 
 export type OurFileRouter = typeof ourFileRouter;
