@@ -180,7 +180,6 @@ export const appRouter = router({
     .input(z.object({ key: z.string() }))
     .mutation(async ({ ctx, input }) => {
       const { userId } = ctx
-      console.log("test 1")
       const file = await db.file.findFirst({
         where: {
           key: input.key,
