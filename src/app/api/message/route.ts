@@ -7,10 +7,10 @@ import { NextRequest } from "next/server";
 
 import { OpenAIStream, StreamingTextResponse } from "ai";
 import { SendMessageValidator } from "@/lib/validators/sendMessageValidator";
-
+ 
 export const POST = async (req: NextRequest) => {
   //endpoint for asking a question to a pdf file
-
+  console.log("Test 1")
   const body = await req.json();
   const { getUser } = getKindeServerSession();
   const user = getUser();
@@ -19,6 +19,7 @@ export const POST = async (req: NextRequest) => {
   if (!userId) return new Response("Unauthorized", { status: 401 });
 
   const { fileId, message } = SendMessageValidator.parse(body);
+  console.log("Test 2")
 
   const file = await db.file.findFirst({
     where: {
@@ -26,6 +27,9 @@ export const POST = async (req: NextRequest) => {
       userId,
     },
   });
+
+  console.log(file)
+
 
   if (!file) return new Response("Not found", { status: 404 });
 
