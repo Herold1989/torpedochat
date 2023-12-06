@@ -38,7 +38,9 @@ const onUploadComplete = async ({
     },
   });
 
-  if (isFileExist) return;
+  if (isFileExist) {
+    return
+  }
 
   const createdFile = await db.file.create({
     data: {
@@ -71,7 +73,10 @@ const onUploadComplete = async ({
     const isFreeExceeded =
       pagesAmt > PLANS.find((plan) => plan.name === "Free")!.pagesPerPdf;
 
-    if ((isSubscribed && isProExceeded) || (!isSubscribed && isFreeExceeded)) {
+    if (
+      (isSubscribed && isProExceeded) ||
+      (!isSubscribed && isFreeExceeded)
+    ) {
       await db.file.update({
         data: {
           uploadStatus: "FAILED",
@@ -84,8 +89,8 @@ const onUploadComplete = async ({
 
     const embeddings = new OpenAIEmbeddings({
       openAIApiKey: process.env.OPENAI_API_KEY,
-    });
-
+    })
+    console.log("EMBEDDINGS", embeddings)
     const qdrantClient = getQdrantClient();
 
     await QdrantVectorStore.fromDocuments(pageLevelDocs, embeddings, {
@@ -104,6 +109,7 @@ const onUploadComplete = async ({
       },
     });
   } catch (err) {
+    console.log(err)
     await db.file.update({
       data: {
         uploadStatus: "FAILED",
