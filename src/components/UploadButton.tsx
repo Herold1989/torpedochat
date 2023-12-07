@@ -70,11 +70,9 @@ const UploadDropzone = ({
 
         // handle file uploading
         const res = await startUpload(acceptedFile)
-        console.log(res)
         if (!res) {
-          console.log("This happens")
           return toast({
-            title: 'Something went wrong',
+            title: 'Something went wrong (Response)',
             description: 'Please try again later',
             variant: 'destructive',
           })
@@ -86,7 +84,7 @@ const UploadDropzone = ({
 
         if (!key) {
           return toast({
-            title: 'Something went wrong',
+            title: 'Something went wrong (Key)',
             description: 'Please try again later',
             variant: 'destructive',
           })
