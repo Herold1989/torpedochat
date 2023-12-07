@@ -72,6 +72,7 @@ const UploadDropzone = ({
         const res = await startUpload(acceptedFile)
         console.log(res)
         if (!res) {
+          console.log("This happens")
           return toast({
             title: 'Something went wrong',
             description: 'Please try again later',
