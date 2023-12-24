@@ -107,7 +107,7 @@ const UploadDropzone = ({
                 <Cloud className='h-6 w-6 text-zinc-500 mb-2' />
                 <p className='mb-2 text-sm text-zinc-700'>
                   <span className='font-semibold'>
-                    Click to upload
+                  Click to upload (not supported in Safari)
                   </span>{' '}
                   or drag and drop
                 </p>
