@@ -90,6 +90,10 @@ const UserAccountNav = async ({
 
         <DropdownMenuSeparator />
 
+        {/* <DropdownMenuItem asChild>
+          <Link href='/'>Delete Account</Link>
+        </DropdownMenuItem> */}
+
         <DropdownMenuItem className='cursor-pointer'>
             <LogoutLink>Log out</LogoutLink>
         </DropdownMenuItem>
