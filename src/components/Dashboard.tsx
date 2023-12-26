@@ -96,7 +96,8 @@ const Dashboard = ({subscriptionPlan}: PageProps) => {
 
                   <Button
                     onClick={() =>
-                      deleteFile({ id: file.id })
+                      deleteFile({ id: file.id,
+                      key: file.key})
                     }
                     size='sm'
                     className='w-full'

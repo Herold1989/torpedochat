@@ -7,6 +7,7 @@ import { INFINITE_QUERY_LIMIT } from '@/config/infinite-query'
 import { absoluteUrl } from '@/lib/utils'
 import { getUserSubscriptionPlan, stripe } from '@/lib/stripe'
 import { PLANS } from '@/config/stripe'
+import { UTApi } from 'uploadthing/server'
 
 export const appRouter = router({
   authCallback: publicProcedure.query(async () => {
@@ -182,8 +183,9 @@ export const appRouter = router({
 
       return file
     }),
-  deleteFile: privateProcedure
-    .input(z.object({ id: z.string() }))
+    
+    deleteFile: privateProcedure
+    .input(z.object({ id: z.string(), key: z.string() }))
     .mutation(async ({ ctx, input }) => {
       const { userId } = ctx
 
@@ -194,18 +196,23 @@ export const appRouter = router({
         },
       })
 
-      if (!file) {
-        throw new TRPCError({ code: 'NOT_FOUND' })
-      }
+      if (!file) throw new TRPCError({ code: 'NOT_FOUND' })
 
       await db.file.delete({
         where: {
           id: input.id,
+          key: input.key,
         },
       })
 
+
+      const utapi = new UTApi({
+        fetch: globalThis.fetch,
+        apiKey: process.env.UPLOADTHING_SECRET,
+      });
+      await utapi.deleteFiles(input.key);
       return file
-    }),
+    }),   
 })
 
 export type AppRouter = typeof appRouter
