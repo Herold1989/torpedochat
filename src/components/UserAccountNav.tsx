@@ -7,11 +7,11 @@ import {
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 import { Button } from "./ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/Avatar"; //could use shadcn-ui directly
+import { Avatar, AvatarFallback } from "@/components/ui/Avatar"; //could use shadcn-ui directly
 import Image from "next/image";
 import { Icons } from "./Icons";
 import Link from "next/link";
-import { Gem } from "lucide-react";
+import { Gem, Settings } from "lucide-react";
 import { LogoutLink } from "@kinde-oss/kinde-auth-nextjs/server";
 
 interface UserAccountNavProps {
@@ -26,6 +26,19 @@ const UserAccountNav = async ({
   name,
 }: UserAccountNavProps) => {
   const subscriptionPlan = await getUserSubscriptionPlan();
+
+  const capitalizeFirstLetters = (str: string | null) => {
+    if (!str) return "";
+  
+    const words = str.split(" ");
+    if (words.length === 1) {
+      // If there's only one word, capitalize its first letter
+      return words[0].charAt(0).toUpperCase();
+    } else {
+      // If there are multiple words, capitalize the first letter of each of the first two words
+      return words[0].charAt(0).toUpperCase() + words[1].charAt(0).toUpperCase();
+    }
+  };
 
   return (
     <DropdownMenu>
@@ -44,7 +57,13 @@ const UserAccountNav = async ({
             ) : (
               <AvatarFallback>
                 <span className="sr-only">{name}</span>
-                <Icons.user className="h-4 w-4 text-zinc-900" />
+                {name ? (
+                  <span className="h-full flex items-center justify-center text-zinc-900 font-semibold">
+                    {capitalizeFirstLetters(name)}
+                  </span>
+                ) : (
+                  <Icons.user className="h-4 w-4 text-zinc-900" />
+                )}
               </AvatarFallback>
             )}
           </Avatar>
@@ -82,17 +101,9 @@ const UserAccountNav = async ({
         <DropdownMenuSeparator />
 
         <DropdownMenuItem asChild className="overflow-hidden">
-        <Link href="/settings">    
-        <div className="mr-2">Account Settings</div>
-          <Button className="rounded-full h-8 w-8 aspect-square bg-white">
-            <Avatar className="relative w-8 h-8">
-                <AvatarFallback>
-                  <span className="sr-only"></span>
-                  <Icons.user className="h-4 w-4 text-zinc-900" />
-                </AvatarFallback>
-            </Avatar>
-          </Button>
-        </Link>
+        <Link href="/settings">
+              Account Settings <Settings className="h-4 w-4 ml-1.5" />
+            </Link>
         </DropdownMenuItem>
 
         <DropdownMenuItem className="cursor-pointer">
