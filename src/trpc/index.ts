@@ -183,6 +183,51 @@ export const appRouter = router({
       return file;
     }),
 
+
+    deleteUser: privateProcedure.mutation(async ({ ctx }) => {
+      const { userId } = ctx;
+    
+      // Delete user messages
+      await db.message.deleteMany({
+        where: {
+          userId,
+        },
+      });
+    
+      // Fetch all user files
+      const userFiles = await db.file.findMany({
+        where: {
+          userId,
+        },
+      });
+    
+      const utapi = new UTApi({
+        fetch: globalThis.fetch,
+        apiKey: process.env.UPLOADTHING_SECRET,
+      });
+    
+      // Delete files from UploadThing
+      for (const file of userFiles) {
+        await utapi.deleteFiles(file.key);
+      }
+    
+      // Delete user files from the database
+      await db.file.deleteMany({
+        where: {
+          userId,
+        },
+      });
+    
+      // Delete user
+      const deletedUser = await db.user.delete({
+        where: {
+          id: userId,
+        },
+      });
+    
+      return deletedUser;
+    }),
+
   deleteFile: privateProcedure
     .input(z.object({ id: z.string(), key: z.string() }))
     .mutation(async ({ ctx, input }) => {

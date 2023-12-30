@@ -30,8 +30,8 @@ model Image {
 
   uploadStatus UploadStatus @default(PENDING)
 
-  url      String
-  key      String
+  url String
+  key String
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt()
