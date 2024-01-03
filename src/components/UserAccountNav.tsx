@@ -99,12 +99,12 @@ const UserAccountNav = async ({
         </DropdownMenuItem>
 
         <DropdownMenuSeparator />
-
+{/* 
         <DropdownMenuItem asChild className="overflow-hidden">
         <Link href="/settings">
               Account Settings <Settings className="h-4 w-4 ml-1.5" />
             </Link>
-        </DropdownMenuItem>
+        </DropdownMenuItem> */}
 
         <DropdownMenuItem className="cursor-pointer">
           <LogoutLink>Log out</LogoutLink>
