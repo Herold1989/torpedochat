@@ -183,50 +183,145 @@ export const appRouter = router({
       return file;
     }),
 
+  getAccessToken: privateProcedure.mutation(async () => {
+    // Replace these with your actual Kinde credentials
+    const client_id = process.env.KINDE_CLIENT_ID;
+    const client_secret = process.env.KINDE_CLIENT_SECRET;
+    const domain = "torpedochat";
 
-    deleteUser: privateProcedure.mutation(async ({ ctx }) => {
-      const { userId } = ctx;
-    
-      // Delete user messages
-      await db.message.deleteMany({
-        where: {
-          userId,
-        },
+    if (!client_id || !client_secret) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "Missing Kinde credentials",
       });
-    
-      // Fetch all user files
-      const userFiles = await db.file.findMany({
-        where: {
-          userId,
-        },
+    }
+
+    const params = new URLSearchParams();
+    params.append("grant_type", "client_credentials");
+    params.append("client_id", client_id);
+    params.append("client_secret", client_secret);
+
+    const response = await fetch(`https://${domain}.kinde.com/oauth2/token`, {
+      method: "POST",
+      headers: {
+        "content-type": "application/x-www-form-urlencoded",
+      },
+      body: params.toString(),
+    });
+
+    if (!response.ok) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "Failed to get Kinde access token",
       });
-    
-      const utapi = new UTApi({
-        fetch: globalThis.fetch,
-        apiKey: process.env.UPLOADTHING_SECRET,
+    }
+
+    const data = await response.json();
+    return data.access_token;
+  }),
+
+  deleteUser: privateProcedure.mutation(async ({ ctx }) => {
+    const { userId } = ctx;
+
+    // Kinde credentials
+    const client_id = process.env.KINDE_CLIENT_ID;
+    const client_secret = process.env.KINDE_CLIENT_SECRET;
+    const domain = "torpedochat";
+    const audience = process.env.KINDE_AUDIENCE!;
+
+    if (!client_id || !client_secret) {
+      throw new TRPCError({
+        code: "FORBIDDEN",
+        message: "Missing Kinde credentials",
       });
-    
-      // Delete files from UploadThing
-      for (const file of userFiles) {
-        await utapi.deleteFiles(file.key);
-      }
-    
-      // Delete user files from the database
-      await db.file.deleteMany({
-        where: {
-          userId,
-        },
+    }
+
+    const params = new URLSearchParams();
+    params.append("grant_type", "client_credentials");
+    params.append("client_id", client_id);
+    params.append("client_secret", client_secret);
+    params.append("audience", audience); // Include the correct audience parameter
+
+    // Get Access Token
+    const response = await fetch(`https://${domain}.kinde.com/oauth2/token`, {
+      method: "POST",
+      headers: {
+        "content-type": "application/x-www-form-urlencoded",
+      },
+      body: params.toString(),
+    });
+
+    if (!response.ok) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "Failed to get Kinde access token",
       });
-    
-      // Delete user
-      const deletedUser = await db.user.delete({
-        where: {
-          id: userId,
-        },
+    }
+
+    const data = await response.json();
+    const access_token = data.access_token;
+
+    // Delete user messages
+    await db.message.deleteMany({
+      where: {
+        userId,
+      },
+    });
+
+    // Fetch all user files
+    const userFiles = await db.file.findMany({
+      where: {
+        userId,
+      },
+    });
+
+    const utapi = new UTApi({
+      fetch: globalThis.fetch,
+      apiKey: process.env.UPLOADTHING_SECRET,
+    });
+
+    // Delete files from UploadThing
+    for (const file of userFiles) {
+      await utapi.deleteFiles(file.key);
+    }
+
+    // Delete user files from the database
+    await db.file.deleteMany({
+      where: {
+        userId,
+      },
+    });
+
+    // Delete user from the database
+    await db.user.delete({
+      where: {
+        id: userId,
+      },
+    });
+
+    const kindeDeleteEndpoint = `https://${domain}.kinde.com/api/v1/user?id=${userId}`;
+
+    const kindeDeleteResponse = await fetch(kindeDeleteEndpoint, {
+      method: "DELETE",
+      headers: {
+        Accept: "application/json",
+        Authorization: `Bearer ${access_token.trim()}`,
+      },
+    });
+
+    if (!kindeDeleteResponse.ok) {
+      const kindeDeleteError = await kindeDeleteResponse.text();
+      console.error("Kinde Delete Error:", kindeDeleteError);
+      throw new TRPCError({
+        code: "FORBIDDEN",
+        message: "Failed to delete user from Kinde",
       });
-    
-      return deletedUser;
-    }),
+    }
+
+    // Parse and return the deleted user
+    const deletedKindeUser = await kindeDeleteResponse.json();
+    return deletedKindeUser;
+  }),
 
   deleteFile: privateProcedure
     .input(z.object({ id: z.string(), key: z.string() }))
