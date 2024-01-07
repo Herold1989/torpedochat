@@ -5,7 +5,6 @@ import MaxWidthWrapper from "./MaxWidthWrapper";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/Avatar";
 import { useRouter } from 'next/navigation'
 import { trpc } from "@/app/_trpc/client";
-import { LogoutLink } from "@kinde-oss/kinde-auth-nextjs/server";
 
 interface SettingsProps {
   user: {
@@ -27,8 +26,7 @@ const Settings = ({ user }: SettingsProps) => {
   const { mutate: deleteUser } = trpc.deleteUser.useMutation({
     onSuccess: () => {
       // Redirect after successful deletion
-      const redirect = process.env.KINDE_POST_LOGOUT_REDIRECT_URL
-      const logout = `https://torpedochat.kinde.com/logout?redirect=${redirect}`;
+      const logout = `https://torpedochat.kinde.com/logout`;
       router.push(logout)
     },
   });
