@@ -44,8 +44,17 @@ export const appRouter = router({
       where: {
         userId,
       },
+      include: {
+        _count: {
+          select: {
+            messages: true,
+          },
+        },
+      },
     });
   }),
+
+
   createStripeSession: privateProcedure.mutation(async ({ ctx }) => {
     const { userId } = ctx;
 
@@ -320,6 +329,8 @@ export const appRouter = router({
 
     // Parse and return the deleted user
     const deletedKindeUser = await kindeDeleteResponse.json();
+    // Revoke User Token
+    //const revokedTokenResult = await revokeTokenResponse.json();
     return deletedKindeUser;
   }),
 
